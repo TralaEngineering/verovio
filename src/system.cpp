@@ -262,9 +262,9 @@ bool System::HasMixedDrawingStemDir(LayerElement *start, LayerElement *end)
     return false;
 }
 
-curvature_CURVEDIR System::GetPreferredCurveDirection(LayerElement *start, LayerElement *end, Slur* slur) 
+curvature_CURVEDIR System::GetPreferredCurveDirection(LayerElement *start, LayerElement *end, Slur *slur)
 {
-    FindSpannedLayerElementsParams findSpannedLayerElementsParams(slur, slur);
+    FindSpannedLayerElementsParams findSpannedLayerElementsParams(slur);
     findSpannedLayerElementsParams.m_minPos = start->GetDrawingX();
     findSpannedLayerElementsParams.m_maxPos = end->GetDrawingX();
     findSpannedLayerElementsParams.m_classIds = { CHORD, NOTE };
@@ -306,7 +306,7 @@ void System::AddToDrawingListIfNeccessary(Object *object)
 
     if (!object->HasInterface(INTERFACE_TIME_SPANNING)) return;
 
-    if (object->Is({ BRACKETSPAN, FIGURE, GLISS, HAIRPIN, OCTAVE, PHRASE, PITCHINFLECTION, SLUR, SYL, TIE })) {
+    if (object->Is({ BRACKETSPAN, FIGURE, GLISS, HAIRPIN, LV, OCTAVE, PHRASE, PITCHINFLECTION, SLUR, SYL, TIE })) {
         this->AddToDrawingList(object);
     }
     else if (object->Is(DIR)) {
@@ -768,6 +768,9 @@ int System::AdjustFloatingPositioners(FunctorParams *functorParams)
     Functor adjustFloatingPositionerGrps(&Object::AdjustFloatingPositionerGrps);
 
     params->m_classId = GLISS;
+    m_systemAligner.Process(params->m_functor, params);
+
+    params->m_classId = LV;
     m_systemAligner.Process(params->m_functor, params);
 
     params->m_classId = TIE;

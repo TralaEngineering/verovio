@@ -67,10 +67,12 @@
 #include "lb.h"
 #include "lem.h"
 #include "ligature.h"
+#include "lv.h"
 #include "mdiv.h"
 #include "measure.h"
 #include "mensur.h"
 #include "metersig.h"
+#include "metersiggrp.h"
 #include "mnum.h"
 #include "mordent.h"
 #include "mrest.h"
@@ -343,6 +345,10 @@ bool MEIOutput::WriteObject(Object *object)
         m_currentNode = m_currentNode.append_child("labelAbbr");
         WriteLabelAbbr(m_currentNode, dynamic_cast<LabelAbbr *>(object));
     }
+    else if (object->Is(METERSIGGRP)) {
+        m_currentNode = m_currentNode.append_child("meterSigGrp");
+        WriteMeterSigGrp(m_currentNode, dynamic_cast<MeterSigGrp *>(object));
+    }
     else if (object->Is(SCOREDEF)) {
         m_currentNode = m_currentNode.append_child("scoreDef");
         WriteScoreDef(m_currentNode, dynamic_cast<ScoreDef *>(object));
@@ -438,6 +444,10 @@ bool MEIOutput::WriteObject(Object *object)
     else if (object->Is(HARM)) {
         m_currentNode = m_currentNode.append_child("harm");
         WriteHarm(m_currentNode, dynamic_cast<Harm *>(object));
+    }
+    else if (object->Is(LV)) {
+        m_currentNode = m_currentNode.append_child("lv");
+        WriteLv(m_currentNode, dynamic_cast<Lv *>(object));
     }
     else if (object->Is(MNUM)) {
         m_currentNode = m_currentNode.append_child("mNum");
@@ -1206,6 +1216,18 @@ void MEIOutput::WriteMeasure(pugi::xml_node currentNode, Measure *measure)
     }
 }
 
+void MEIOutput::WriteMeterSigGrp(pugi::xml_node currentNode, MeterSigGrp *meterSigGrp)
+{
+    assert(meterSigGrp);
+
+    WriteXmlId(currentNode, meterSigGrp);
+    WriteLinkingInterface(currentNode, meterSigGrp);
+    meterSigGrp->WriteBasic(currentNode);
+    meterSigGrp->WriteLabelled(currentNode);
+    meterSigGrp->WriteMeterSigGrpLog(currentNode);
+    meterSigGrp->WriteTyped(currentNode);
+}
+
 void MEIOutput::WriteFb(pugi::xml_node currentNode, Fb *fb)
 {
     assert(fb);
@@ -1309,6 +1331,7 @@ void MEIOutput::WriteFermata(pugi::xml_node currentNode, Fermata *fermata)
     WriteControlElement(currentNode, fermata);
     WriteTimePointInterface(currentNode, fermata);
     fermata->WriteColor(currentNode);
+    fermata->WriteEnclosingChars(currentNode);
     fermata->WriteExtSym(currentNode);
     fermata->WriteFermataVis(currentNode);
     fermata->WritePlacementRelStaff(currentNode);
@@ -1358,6 +1381,17 @@ void MEIOutput::WriteHarm(pugi::xml_node currentNode, Harm *harm)
     WriteTimeSpanningInterface(currentNode, harm);
     harm->WriteLang(currentNode);
     harm->WriteNNumberLike(currentNode);
+}
+
+void MEIOutput::WriteLv(pugi::xml_node currentNode, Lv *lv)
+{
+    assert(lv);
+
+    WriteControlElement(currentNode, lv);
+    WriteTimeSpanningInterface(currentNode, lv);
+    lv->WriteColor(currentNode);
+    lv->WriteCurvature(currentNode);
+    lv->WriteCurveRend(currentNode);
 }
 
 void MEIOutput::WriteMNum(pugi::xml_node currentNode, MNum *mNum)
@@ -1575,6 +1609,7 @@ void MEIOutput::WriteArtic(pugi::xml_node currentNode, Artic *artic)
     WriteLayerElement(currentNode, artic);
     artic->WriteArticulation(currentNode);
     artic->WriteColor(currentNode);
+    artic->WriteEnclosingChars(currentNode);
     artic->WriteExtSym(currentNode);
     artic->WritePlacementRelEvent(currentNode);
 }
@@ -3728,6 +3763,9 @@ bool MEIInput::ReadScoreDefChildren(Object *parent, pugi::xml_node parentNode)
         else if (std::string(current.name()) == "meterSig") {
             success = ReadMeterSig(parent, current);
         }
+        else if (std::string(current.name()) == "meterSigGrp") {
+            success = ReadMeterSigGrp(parent, current);
+        }
         // headers and footers
         else if (std::string(current.name()) == "pgFoot") {
             success = ReadPgFoot(parent, current);
@@ -3998,6 +4036,9 @@ bool MEIInput::ReadStaffDefChildren(Object *parent, pugi::xml_node parentNode)
         else if (std::string(current.name()) == "meterSig") {
             success = ReadMeterSig(parent, current);
         }
+        else if (std::string(current.name()) == "meterSigGrp") {
+            success = ReadMeterSigGrp(parent, current);
+        }
         // content
         else if (std::string(current.name()) == "instrDef") {
             success = ReadInstrDef(parent, current);
@@ -4193,6 +4234,9 @@ bool MEIInput::ReadMeasureChildren(Object *parent, pugi::xml_node parentNode)
         else if (std::string(current.name()) == "harm") {
             success = ReadHarm(parent, current);
         }
+        else if (std::string(current.name()) == "lv") {
+            success = ReadLv(parent, current);
+        }
         else if (std::string(current.name()) == "mNum") {
             success = ReadMNum(parent, current);
         }
@@ -4243,6 +4287,46 @@ bool MEIInput::ReadMeasureChildren(Object *parent, pugi::xml_node parentNode)
         }
         else {
             LogWarning("Unsupported '<%s>' within <measure>", current.name());
+        }
+    }
+    return success;
+}
+
+bool MEIInput::ReadMeterSigGrp(Object *parent, pugi::xml_node meterSigGrp)
+{
+    assert(dynamic_cast<ScoreDef *>(parent) || dynamic_cast<StaffDef *>(parent) || dynamic_cast<Layer *>(parent));
+
+    MeterSigGrp *vrvMeterSigGrp = new MeterSigGrp();
+    SetMeiUuid(meterSigGrp, vrvMeterSigGrp);
+    ReadLinkingInterface(meterSigGrp, vrvMeterSigGrp);
+    vrvMeterSigGrp->ReadBasic(meterSigGrp);
+    vrvMeterSigGrp->ReadLabelled(meterSigGrp);
+    vrvMeterSigGrp->ReadMeterSigGrpLog(meterSigGrp);
+    vrvMeterSigGrp->ReadTyped(meterSigGrp);
+
+    parent->AddChild(vrvMeterSigGrp);
+    ReadUnsupportedAttr(meterSigGrp, vrvMeterSigGrp);
+    return ReadMeterSigGrpChildren(vrvMeterSigGrp, meterSigGrp);
+}
+
+bool MEIInput::ReadMeterSigGrpChildren(Object *parent, pugi::xml_node parentNode)
+{
+    assert(dynamic_cast<MeterSigGrp *>(parent));
+
+    bool success = true;
+    pugi::xml_node current;
+    for (current = parentNode.first_child(); current; current = current.next_sibling()) {
+        if (!success) break;
+        // content
+        else if (std::string(current.name()) == "meterSig") {
+            success = ReadMeterSig(parent, current);
+        }
+        // xml comment
+        else if (std::string(current.name()) == "") {
+            success = ReadXMLComment(parent, current);
+        }
+        else {
+            LogWarning("Unsupported '<%s>' within <meterSigGrp>", current.name());
         }
     }
     return success;
@@ -4372,6 +4456,7 @@ bool MEIInput::ReadFermata(Object *parent, pugi::xml_node fermata)
 
     ReadTimePointInterface(fermata, vrvFermata);
     vrvFermata->ReadColor(fermata);
+    vrvFermata->ReadEnclosingChars(fermata);
     vrvFermata->ReadExtSym(fermata);
     vrvFermata->ReadFermataVis(fermata);
     vrvFermata->ReadPlacementRelStaff(fermata);
@@ -4441,6 +4526,21 @@ bool MEIInput::ReadHarm(Object *parent, pugi::xml_node harm)
     parent->AddChild(vrvHarm);
     ReadUnsupportedAttr(harm, vrvHarm);
     return ReadTextChildren(vrvHarm, harm, vrvHarm);
+}
+
+bool MEIInput::ReadLv(Object *parent, pugi::xml_node lv)
+{
+    Lv *vrvLv = new Lv();
+    ReadControlElement(lv, vrvLv);
+
+    ReadTimeSpanningInterface(lv, vrvLv);
+    vrvLv->ReadColor(lv);
+    vrvLv->ReadCurvature(lv);
+    vrvLv->ReadCurveRend(lv);
+
+    parent->AddChild(vrvLv);
+    ReadUnsupportedAttr(lv, vrvLv);
+    return true;
 }
 
 bool MEIInput::ReadMNum(Object *parent, pugi::xml_node mNum)
@@ -4836,6 +4936,9 @@ bool MEIInput::ReadLayerChildren(Object *parent, pugi::xml_node parentNode, Obje
         else if (elementName == "meterSig") {
             success = ReadMeterSig(parent, xmlElement);
         }
+        else if (elementName == "meterSigGrp") {
+            success = ReadMeterSigGrp(parent, xmlElement);
+        }
         else if (elementName == "nc") {
             success = ReadNc(parent, xmlElement);
         }
@@ -4945,6 +5048,7 @@ bool MEIInput::ReadArtic(Object *parent, pugi::xml_node artic)
 
     vrvArtic->ReadArticulation(artic);
     vrvArtic->ReadColor(artic);
+    vrvArtic->ReadEnclosingChars(artic);
     vrvArtic->ReadExtSym(artic);
     vrvArtic->ReadPlacementRelEvent(artic);
 

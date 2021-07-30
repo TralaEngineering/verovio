@@ -44,6 +44,7 @@ class LabelAbbr;
 class Layer;
 class LayerElement;
 class Measure;
+class MeterSigGrp;
 class Octave;
 class Pedal;
 class Section;
@@ -123,7 +124,8 @@ namespace musicxml {
 
     class ClefChange {
     public:
-        ClefChange(const std::string &measureNum, Staff *staff, Layer *layer, Clef *clef, const int &scoreOnset, bool afterBarline)
+        ClefChange(const std::string &measureNum, Staff *staff, Layer *layer, Clef *clef, const int &scoreOnset,
+            bool afterBarline)
         {
             m_measureNum = measureNum;
             m_staff = staff;
@@ -212,6 +214,8 @@ private:
     void ReadMusicXmlBeamsAndTuplets(const pugi::xml_node &node, Layer *layer, bool isChord);
     void ReadMusicXmlTupletStart(const pugi::xml_node &node, const pugi::xml_node &tupletStart, Layer *layer);
     void ReadMusicXmlBeamStart(const pugi::xml_node &node, const pugi::xml_node &beamStart, Layer *layer);
+    void ReadMusicXMLMeterSig(const pugi::xml_node &node, Object *parent);
+    void ReadMusicXmlTies(const pugi::xml_node &node, Layer *layer, Note *note, const std::string &measureNum);
     ///@}
 
     /**
@@ -223,11 +227,20 @@ private:
      * Add clef changes to all layers of a given measure, staff, and time stamp
      */
     void AddClefs(Measure *measure, const musicxml::ClefChange &clefChange);
-    
+
     /**
      * Add clef as layer element to specified layer and #sameas clefs to previous layers, if needed
      */
     void InsertClefToLayer(Staff *staff, Layer *layer, Clef *clef, int scoreOnSet);
+
+    /*
+     * @name Helper function to insert clef into correct position in layer/other parent based on the insertAfter
+     * variable.
+     */
+    ///@{
+    void InsertClefIntoObject(Object *layerElement, Clef *clef, Layer *layer, int scoreOnset, bool insertAfter);
+    void InsertClefIntoObject(Object *parent, Clef *clef, Object *relevantChild, bool insertAfter);
+    ///@}
 
     /*
      * Add a Measure to the section.
@@ -334,6 +347,14 @@ private:
     void GenerateUuid(pugi::xml_node node);
 
     /*
+     * @name Helper method for meterSigGrp. Separates beat/beat-type into MeterSig and adds them to the MeterSigGrp.
+     * Returns total meterCount and meterUnit for the group
+     */
+    ///@{
+    std::pair<std::vector<int>, int> GetMeterSigGrpValues(const pugi::xml_node &node, MeterSigGrp *parent);
+    ///@}
+
+    /*
      * @name Helper method for multirests. Returns number of measure hidden by MRest before
      * measure with certain index
      */
@@ -405,7 +426,7 @@ private:
     /* measure repeats */
     bool m_slash = false;
     /* MIDI ticks */
-    int m_ppq;
+    int m_ppq = 1;
     /* measure time */
     int m_durTotal = 0;
     /* measure time */

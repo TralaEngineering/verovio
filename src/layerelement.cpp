@@ -36,6 +36,7 @@
 #include "measure.h"
 #include "mensur.h"
 #include "metersig.h"
+#include "metersiggrp.h"
 #include "mrest.h"
 #include "mrpt.h"
 #include "mrpt2.h"
@@ -834,6 +835,12 @@ MapOfDotLocs LayerElement::CalcOptimalDotLocations()
                 Note *note = vrv_cast<Note *>(this);
                 Note *otherNote = vrv_cast<Note *>(other);
                 if (note->IsUnisonWith(otherNote)) {
+                    if (note->GetDrawingStemDir() == STEMDIRECTION_up) {
+                        otherNote->AlignDotsShift(note);
+                    }
+                    else if (otherNote->GetDrawingStemDir() == STEMDIRECTION_up) {
+                        note->AlignDotsShift(otherNote);
+                    }
                     return (currentLayerN < otherLayerN) ? dotLocs1 : dotLocs2;
                 }
             }
@@ -947,6 +954,7 @@ int LayerElement::AlignHorizontally(FunctorParams *functorParams)
     Note *noteParent = dynamic_cast<Note *>(this->GetFirstAncestor(NOTE, MAX_NOTE_DEPTH));
     Rest *restParent = dynamic_cast<Rest *>(this->GetFirstAncestor(REST, MAX_NOTE_DEPTH));
     TabGrp *tabGrpParent = dynamic_cast<TabGrp *>(this->GetFirstAncestor(TABGRP, MAX_TABGRP_DEPTH));
+    const bool ligatureAsBracket = params->m_doc->GetOptions()->m_ligatureAsBracket.GetValue();
 
     if (chordParent) {
         m_alignment = chordParent->GetAlignment();
@@ -963,7 +971,7 @@ int LayerElement::AlignHorizontally(FunctorParams *functorParams)
     else if (this->Is({ DOTS, FLAG, STEM })) {
         assert(false);
     }
-    else if (ligatureParent && this->Is(NOTE)) {
+    else if (ligatureParent && this->Is(NOTE) && !ligatureAsBracket) {
         // Ligature notes are all aligned with the first note
         Note *note = vrv_cast<Note *>(this);
         assert(note);
@@ -1025,6 +1033,8 @@ int LayerElement::AlignHorizontally(FunctorParams *functorParams)
             type = ALIGNMENT_SCOREDEF_METERSIG;
         else if (this->GetScoreDefRole() == SCOREDEF_CAUTIONARY)
             type = ALIGNMENT_SCOREDEF_CAUTION_METERSIG;
+        else if (this->GetParent() && this->GetParent()->Is(METERSIGGRP))
+            type = ALIGNMENT_SCOREDEF_METERSIG;
         else {
             // replace the current meter signature
             params->m_currentMeterSig = vrv_cast<MeterSig *>(this);
@@ -1692,7 +1702,7 @@ int LayerElement::AdjustTupletNumOverlap(FunctorParams *functorParams)
 
     if (params->m_ignoreCrossStaff && Is({ CHORD, NOTE, REST }) && m_crossStaff) return FUNCTOR_SIBLINGS;
 
-    if (!params->m_tupletNum->HorizontalSelfOverlap(this)
+    if (!params->m_tupletNum->HorizontalSelfOverlap(this, params->m_horizontalMargin)
         && !params->m_tupletNum->VerticalSelfOverlap(this, params->m_verticalMargin)) {
         return FUNCTOR_CONTINUE;
     }
@@ -1783,8 +1793,9 @@ int LayerElement::AdjustXPos(FunctorParams *functorParams)
                 bool hasOverlap = this->HorizontalContentOverlap(boundingBox, margin);
 
                 if (hasOverlap) {
-                    // For note to note alignment, make sure there is a standard spacing even if they to not overlap vertically
-                    if (this->Is(NOTE) and element->Is(NOTE)) {
+                    // For note to note alignment, make sure there is a standard spacing even if they to not overlap
+                    // vertically
+                    if (this->Is(NOTE) && element->Is(NOTE)) {
                         overlap = std::max(overlap, element->GetSelfRight() - this->GetSelfLeft() + margin);
                     }
                     else {
@@ -1833,6 +1844,21 @@ int LayerElement::AdjustXPos(FunctorParams *functorParams)
     }
     else {
         params->m_upcomingMinPos = std::max(selfRight, params->m_upcomingMinPos);
+    }
+
+    auto it = std::find_if(params->m_measureTieEndpoints.begin(), params->m_measureTieEndpoints.end(),
+        [this](const std::pair<LayerElement *, LayerElement *> &pair) { return pair.second == this; });
+    if (it != params->m_measureTieEndpoints.end()) {
+        const int minTiedDistance = 7 * drawingUnit;
+        const int alignmentDistance = it->second->GetAlignment()->GetXRel() - it->first->GetAlignment()->GetXRel();
+        if ((alignmentDistance < minTiedDistance)
+            && ((this->GetFirstAncestor(CHORD) != NULL) || (it->first->FindDescendantByType(FLAG) != NULL))) {
+            const int adjust = minTiedDistance - alignmentDistance;
+            this->GetAlignment()->SetXRel(this->GetAlignment()->GetXRel() + adjust);
+            // Also move the accumulated x shift and the minimum position for the next alignment accordingly
+            params->m_cumulatedXShift += adjust;
+            params->m_upcomingMinPos += adjust;
+        }
     }
 
     return FUNCTOR_SIBLINGS;
