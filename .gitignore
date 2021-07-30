@@ -1,97 +1,119 @@
-# xcode
-Verovio.xcodeproj
-Verovio.xccheckout
-Verovio.xcodeproj/project.xcworkspace/xcshareddata
-Verovio.xcodeproj/project.xcworkspace/xcuserdata
-Verovio.xcodeproj/xcuserdata/
-bin/
-build/
-
-# Qt Creator
-tools/CMakeLists.txt.user
-build-tools-*
-
-# doc generated file
-doc/pae-tests.html
-
-# include file generated at compilation
-include/vrv/git_commit.h
-bindings/iOS/all.h
-
-# cmake build
-tools/CMakeCache.txt
-tools/CMakeFiles/
-tools/Makefile
-tools/cmake_install.cmake
-tools/install_manifest.txt
-tools/verovio
-tools/build-library
-tools/libverovio.dylib
-tools/libverovio.so
-
-# emscripten build
-emscripten/data/
-emscripten/build/
-emscripten/CMakeFiles/
-emscripten/CMakeCache.txt
-
-# python build
-bindings/python/verovio_wrap.cpp
-bindings/python/verovio.pyc
-bindings/python/verovio.py
-bindings/python/_verovio*.so
-bindings/python/__pycache__/*
-bindings/python/CMakeCache.txt
-bindings/python/CMakeFiles/
-verovio.egg-info
-
-# java build
-bindings/java/verovio_wrap.cxx
-bindings/java/main.class
-bindings/java/src/
-bindings/java/target/
-main.class
-leipzig-5.2.log
-leipzig-5.2_data.ly
-
-# Qt build
-bindings/qt/build-verovio-qt-*
-bindings/qt/build-library
-bindings/qt/build-demo
-*.pro.user
-
-# Android build
-bindings/android/obj
-bindings/android/libs
-bindings/qt/build-android
-
-# MacOS
+# Mac Finder files
 .DS_Store
 
-# Output files
-output.svg
-output.mei
-index.js
-emscripten/npm-dev/node_modules
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
 
-# VS Code files
-.vscode/settings.json
-main
-DerivedData
-verovio.wasm
-Makefile
-libverovio.bc
-cmake_install.cmake
-libverovio.a
-tools/.cmake
-tools/compile_commands.json
+# C extensions
+*.so
 
-# VS Studio files
-.vs/
-Debug/
-Release/
-*.vcxproj*
-*.sln
+# Distribution / packaging
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
 
-# Fonts
-fonts/tmp/
+# PyInstaller
+#  Usually these files are written by a python script from a template
+#  before PyInstaller builds the exe, so as to inject date/other infos into it.
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+
+# Translations
+*.mo
+*.pot
+
+# Django stuff:
+*.log
+local_settings.py
+
+# Flask stuff:
+instance/
+.webassets-cache
+
+# Scrapy stuff:
+.scrapy
+
+# Sphinx documentation
+docs/_build/
+
+# PyBuilder
+target/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# pyenv
+.python-version
+
+# celery beat schedule file
+celerybeat-schedule
+
+# SageMath parsed files
+*.sage.py
+
+# dotenv
+.env
+
+# virtualenv
+.venv
+venv/
+ENV/
+
+# Spyder project settings
+.spyderproject
+.spyproject
+
+# Rope project settings
+.ropeproject
+
+# mkdocs documentation
+/site
+
+# mypy
+.mypy_cache/
+
+# AWS packaged dependencies
+package/
+
+# Zipfiles
+*.zip
+
+# Default Swift Package Manager .gitignore:
+.DS_Store
+/.build
+/Packages
+/*.xcodeproj
+xcuserdata/
+DerivedData/
+.swiftpm/xcode/package.xcworkspace/contents.xcworkspacedata

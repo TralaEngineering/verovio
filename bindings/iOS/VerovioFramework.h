@@ -5,7 +5,7 @@
 //  Created by Thomas Ramson on 06.06.19.
 //
 
-#import <UIKit/UIKit.h>
+#import <Foundation/Foundation.h>
 
 //! Project version number for VerovioFramework.
 FOUNDATION_EXPORT double VerovioFrameworkVersionNumber;
