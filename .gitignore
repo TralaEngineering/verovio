@@ -104,7 +104,3 @@ fonts/tmp/
 xcuserdata/
 DerivedData/
 .swiftpm/xcode/package.xcworkspace/contents.xcworkspacedata
-
-# SPM Linked Header Files
-/bindings/spm/include/*.h
-/bindings/spm/include/*.hpp
