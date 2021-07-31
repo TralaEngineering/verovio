@@ -1,4 +1,4 @@
-// swift-tools-version:5.3
+// swift-tools-version:5.4
 
 import PackageDescription
 
@@ -42,6 +42,7 @@ let package = Package(
                 "libmei/atts_header.cpp",
                 "libmei/atts_figtable.cpp",
                 "libmei/atts_edittrans.cpp",
+                "bindings/spm/create_spm_header_symlinks.sh"
             ],
             sources: [
                 "libmei/",
@@ -60,35 +61,12 @@ let package = Package(
                 "src/pugi/",
             ],
             resources: [.copy("data/")],
-            publicHeadersPath: "include",
+            publicHeadersPath: "bindings/spm/include/",
             cxxSettings: [
                 .headerSearchPath("libmei/"),
-                .headerSearchPath("include/"),
-                .headerSearchPath("include/hum/"),
-                .headerSearchPath("include/json/"),
-                .headerSearchPath("include/midi/"),
-                .headerSearchPath("include/pugi/"),
-                .headerSearchPath("include/utf8/"),
-                .headerSearchPath("include/vrv/"),
-                .headerSearchPath("include/zip/"),
-                .headerSearchPath("src/"),
-                .headerSearchPath("src/hum/"),
-                .headerSearchPath("src/json/"),
-                .headerSearchPath("src/midi/"),
-                .headerSearchPath("src/pugi/"),
+                .headerSearchPath("include/**"),
+                .headerSearchPath("src/**"),
                 .define("COCOAPODS"),
-                .define("CLANG_CXX_LANGUAGE_STANDARD", to: "c++17"),
-                .define("CLANG_CXX_LIBRARY", to: "libc++"),
-                .define("GCC_C_LANGUAGE_STANDARD", to: "gnu11"),
-                .define("GCC_DYNAMIC_NO_PIC", to: "NO"),
-                .define("GCC_NO_COMMON_BLOCKS", to: "YES"),
-                .define("GCC_SYMBOLS_PRIVATE_EXTERN", to: "NO"),
-                .define("CLANG_ENABLE_OBJC_ARC", to: "YES"),
-                .define("CLANG_ENABLE_OBJC_WEAK", to: "YES"),
-                .define("ENABLE_STRICT_OBJC_MSGSEND", to: "YES"),
-                .define("MTL_FAST_MATH", to: "YES"),
-                .define("SUPPORTS_UIKITFORMAC", to: "NO"),
-                .define("MTL_ENABLE_DEBUG_INFO", to: "NO"),
             ],
             linkerSettings: []
         ),
@@ -106,5 +84,5 @@ let package = Package(
                     swiftSettings: nil,
                     linkerSettings: nil)
     ],
-    cxxLanguageStandard: .cxx1z
+    cxxLanguageStandard: .cxx17
 )
