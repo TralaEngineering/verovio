@@ -11,8 +11,9 @@ let package = Package(
         ),
     ],
     targets: [
+        .target(name: "Verovio", dependencies: ["VerovioGuts"], path: "bindings/spm/Sources/Verovio", exclude: [], sources: nil, resources: nil, publicHeadersPath: nil, cSettings: nil, cxxSettings: nil, swiftSettings: nil, linkerSettings: nil),
         .target(
-            name: "Verovio",
+            name: "VerovioGuts",
             dependencies: [],
             path: ".",
             exclude: [
@@ -45,6 +46,7 @@ let package = Package(
                 "bindings/spm/Tests/VerovioTests"
             ],
             sources: [
+                "bindings/spm/Sources/Verovio",
                 "libmei/",
                 "include/",
                 "include/hum/",
@@ -58,18 +60,17 @@ let package = Package(
                 "src/hum/",
                 "src/json/",
                 "src/midi/",
-                "src/pugi/",
-                "bindings/spm/Sources/Verovio",
+                "src/pugi/"
             ],
             resources: [.copy("data/")],
-            publicHeadersPath: "bindings/spm/Sources/Verovio",
+            publicHeadersPath: "bindings/spm/Sources/VerovioGuts",
             cxxSettings: [
                 .headerSearchPath("libmei/"),
                 .headerSearchPath("include/**"),
                 .headerSearchPath("src/**"),
                 .define("COCOAPODS"),
             ],
-            linkerSettings: []
+            linkerSettings: nil
         ),
         .testTarget(name: "VerovioTests",
                     dependencies: ["Verovio"],
