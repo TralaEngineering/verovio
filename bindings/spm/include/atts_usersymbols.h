@@ -1,1 +1,0 @@
-../../../libmei/atts_usersymbols.h

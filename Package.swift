@@ -31,7 +31,6 @@ let package = Package(
                 "emscripten/",
                 "cmake/",
                 "tools/",
-                "Tests/",
                 "include/json/LICENSE",
                 "include/json/Makefile",
                 "include/json/README.textile",
@@ -42,7 +41,8 @@ let package = Package(
                 "libmei/atts_header.cpp",
                 "libmei/atts_figtable.cpp",
                 "libmei/atts_edittrans.cpp",
-                "bindings/spm/create_spm_header_symlinks.sh"
+                "bindings/spm/create_spm_header_symlinks.sh",
+                "bindings/spm/Tests/VerovioTests"
             ],
             sources: [
                 "libmei/",
@@ -59,9 +59,10 @@ let package = Package(
                 "src/json/",
                 "src/midi/",
                 "src/pugi/",
+                "bindings/spm/Sources/Verovio",
             ],
             resources: [.copy("data/")],
-            publicHeadersPath: "bindings/spm/include/",
+            publicHeadersPath: "bindings/spm/Sources/Verovio",
             cxxSettings: [
                 .headerSearchPath("libmei/"),
                 .headerSearchPath("include/**"),
@@ -72,15 +73,14 @@ let package = Package(
         ),
         .testTarget(name: "VerovioTests",
                     dependencies: ["Verovio"],
-                    path: nil,
+                    path: "bindings/spm/Tests",
                     exclude: [],
                     sources: nil,
-                    resources: nil,
-                    cSettings: nil,
-                    cxxSettings: [
-                        .unsafeFlags(["-fmodules"]),
-                        .unsafeFlags(["-fcxx-modules"])
+                    resources: [
+                        .copy("TestData.musicxml")
                     ],
+                    cSettings: nil,
+                    cxxSettings: nil,
                     swiftSettings: nil,
                     linkerSettings: nil)
     ],
