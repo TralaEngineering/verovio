@@ -7,13 +7,13 @@ let package = Package(
     products: [
         .library(
             name: "Verovio",
+            type: .dynamic,
             targets: ["Verovio"]
         ),
     ],
     targets: [
-        .target(name: "Verovio", dependencies: ["VerovioGuts"], path: "bindings/spm/Sources/Verovio", exclude: [], sources: nil, resources: nil, publicHeadersPath: nil, cSettings: nil, cxxSettings: nil, swiftSettings: nil, linkerSettings: nil),
         .target(
-            name: "VerovioGuts",
+            name: "Verovio",
             dependencies: [],
             path: ".",
             exclude: [
@@ -27,7 +27,12 @@ let package = Package(
                 "COPYING",
                 "README.md",
                 "fonts/",
-                "bindings/",
+                "bindings/android",
+                "bindings/c",
+                "bindings/iOS",
+                "bindings/java",
+                "bindings/python",
+                "bindings/qt",
                 "doc/",
                 "emscripten/",
                 "cmake/",
@@ -46,7 +51,7 @@ let package = Package(
                 "bindings/spm/Tests/VerovioTests"
             ],
             sources: [
-                "bindings/spm/Sources/Verovio",
+                "bindings/spm/Sources/Verovio/",
                 "libmei/",
                 "include/",
                 "include/hum/",
@@ -63,7 +68,7 @@ let package = Package(
                 "src/pugi/"
             ],
             resources: [.copy("data/")],
-            publicHeadersPath: "bindings/spm/Sources/VerovioGuts",
+            publicHeadersPath: "bindings/spm/Sources/Verovio",
             cxxSettings: [
                 .headerSearchPath("libmei/"),
                 .headerSearchPath("include/**"),
@@ -74,11 +79,11 @@ let package = Package(
         ),
         .testTarget(name: "VerovioTests",
                     dependencies: ["Verovio"],
-                    path: "bindings/spm/Tests",
+                    path: "bindings/spm/Tests/VerovioTests",
                     exclude: [],
                     sources: nil,
                     resources: [
-                        .copy("TestData.musicxml")
+                        .process("TestData.musicxml")
                     ],
                     cSettings: nil,
                     cxxSettings: nil,

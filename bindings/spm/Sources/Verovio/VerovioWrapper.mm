@@ -1,5 +1,7 @@
 #import "VerovioWrapper.h"
 #import <dispatch/dispatch.h>
+#import "../../../../include/vrv/toolkit.h"
+#import "BundleHelper.h"
 
 
 @implementation Verovio
@@ -13,7 +15,7 @@ static dispatch_queue_t renderQueue = dispatch_queue_create("com.rism.Verovio.sh
     if (self) {
         static dispatch_once_t onceToken;
         dispatch_once(&onceToken, ^{
-            NSBundle * verovioBundle = [NSBundle bundleForClass:[self class]];
+            NSBundle * verovioBundle = [BundleHelper bundleForModule];
             NSString * resourcePath = [verovioBundle URLsForResourcesWithExtension:@"xml" subdirectory:@"data"].firstObject.URLByDeletingLastPathComponent.path;
             vrv::Resources::SetPath([resourcePath cStringUsingEncoding:NSUTF8StringEncoding]);
             if (!vrv::Resources::InitFonts()) {
