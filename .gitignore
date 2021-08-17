@@ -96,3 +96,12 @@ Release/
 
 # Fonts
 fonts/tmp/
+
+# Default Swift Package Manager .gitignore:
+.DS_Store
+/.build
+/Packages
+/*.xcodeproj
+xcuserdata/
+DerivedData/
+.swiftpm/xcode/package.xcworkspace/contents.xcworkspacedata
