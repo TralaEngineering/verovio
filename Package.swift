@@ -39,7 +39,7 @@ let package = Package(
                 "tools/",
                 "include/json/LICENSE",
                 "include/json/Makefile",
-                "include/json/README.textile",
+                "include/json/README.md",
                 "libmei/atts_fingering.cpp",
                 "libmei/atts_usersymbols.cpp",
                 "libmei/atts_harmony.cpp",
