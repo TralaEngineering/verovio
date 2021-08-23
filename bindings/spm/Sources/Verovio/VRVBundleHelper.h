@@ -1,5 +1,5 @@
 //
-//  BundleHelper.h
+//  VRVBundleHelper.h
 //  
 //
 //  Created by Joshua Elkins on 8/2/21.
@@ -8,7 +8,7 @@
 #import <Foundation/Foundation.h>
 
 
-@interface BundleHelper: NSObject
+@interface VRVBundleHelper: NSObject
 
 /// For some reason, SPM's generated bundle accessor helper method
 /// isn't accessible from a .mm file (the static function that retrieves

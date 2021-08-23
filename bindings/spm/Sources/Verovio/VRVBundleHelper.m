@@ -1,14 +1,14 @@
 //
-//  BundleHelper.m
+//  VRVBundleHelper.m
 //  
 //
 //  Created by Joshua Elkins on 8/2/21.
 //
 
-#import "BundleHelper.h"
+#import "VRVBundleHelper.h"
 
 
-@implementation BundleHelper
+@implementation VRVBundleHelper
 
 + (NSBundle *)bundleForModule {
     return SWIFTPM_MODULE_BUNDLE;

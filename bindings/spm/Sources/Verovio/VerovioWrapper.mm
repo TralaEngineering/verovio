@@ -1,7 +1,7 @@
 #import "VerovioWrapper.h"
 #import <dispatch/dispatch.h>
 #import "../../../../include/vrv/toolkit.h"
-#import "BundleHelper.h"
+#import "VRVBundleHelper.h"
 
 
 @implementation Verovio
@@ -13,7 +13,7 @@ static dispatch_queue_t renderQueue = dispatch_queue_create("com.rism.Verovio.sh
 - (NSString *)renderFirstPageForURL:(NSURL *)url withOptions:(NSDictionary *)options {
     NSString * __block svg;
     dispatch_sync(renderQueue, ^{
-        NSBundle * verovioBundle = [BundleHelper bundleForModule];
+        NSBundle * verovioBundle = [VRVBundleHelper bundleForModule];
         NSString * resourcePath = [verovioBundle URLsForResourcesWithExtension:@"xml" subdirectory:@"data"].firstObject.URLByDeletingLastPathComponent.path;
         vrv::Resources::SetPath([resourcePath cStringUsingEncoding:NSUTF8StringEncoding]);
         if (!vrv::Resources::InitFonts()) {
