@@ -47,7 +47,6 @@ let package = Package(
                 "libmei/atts_header.cpp",
                 "libmei/atts_figtable.cpp",
                 "libmei/atts_edittrans.cpp",
-                "bindings/spm/create_spm_header_symlinks.sh",
                 "bindings/spm/Tests/VerovioTests"
             ],
             sources: [
