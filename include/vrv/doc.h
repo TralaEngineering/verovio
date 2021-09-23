@@ -46,7 +46,6 @@ public:
     ///@{
     Doc();
     virtual ~Doc();
-    virtual ClassId GetClassId() const { return DOC; }
     ///@}
 
     /**
@@ -182,7 +181,9 @@ public:
      */
     ///@{
     double GetLeftMargin(const ClassId classId) const;
+    double GetLeftMargin(Object *object) const;
     double GetRightMargin(const ClassId classId) const;
+    double GetRightMargin(Object *object) const;
     double GetLeftPosition() const;
     double GetBottomMargin(const ClassId classId) const;
     double GetTopMargin(const ClassId classId) const;
@@ -221,6 +222,11 @@ public:
     void PrepareJsonTimemap(std::string &output, std::map<double, double> &realTimeToScoreTime,
         std::map<double, std::vector<std::string>> &realTimeToOnElements,
         std::map<double, std::vector<std::string>> &realTimeToOffElements, std::map<double, double> &realTimeToTempo);
+
+    /**
+     * Extract music features to JSON string.
+     */
+    bool ExportFeatures(std::string &output, const std::string &options);
 
     /**
      * Set the initial scoreDef of each page.

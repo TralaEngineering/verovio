@@ -42,6 +42,7 @@
 
 #include "MidiFile.h"
 #include "checked.h"
+#include "crc.h"
 #include "jsonxx.h"
 #include "unchecked.h"
 
@@ -417,6 +418,12 @@ bool Toolkit::LoadData(const std::string &data)
 {
     std::string newData;
     Input *input = NULL;
+
+    if (m_options->m_xmlIdChecksum.GetValue()) {
+        crcInit();
+        unsigned int cr = crcFast((unsigned char *)data.c_str(), (int)data.size());
+        Object::SeedUuid(cr);
+    }
 
 #ifndef NO_HUMDRUM_SUPPORT
     ClearHumdrumBuffer();
@@ -906,7 +913,8 @@ bool Toolkit::SetOptions(const std::string &jsonOptions)
             }
             else if (iter->first == "xmlIdSeed") {
                 if (json.has<jsonxx::Number>("xmlIdSeed")) {
-                    Object::SeedUuid(json.get<jsonxx::Number>("xmlIdSeed"));
+                    m_options->m_xmlIdSeed.SetValue(json.get<jsonxx::Number>("xmlIdSeed"));
+                    Object::SeedUuid(m_options->m_xmlIdSeed.GetValue());
                 }
             }
             // Deprecated option
@@ -1091,6 +1099,12 @@ std::string Toolkit::GetVersion()
     return vrv::GetVersion();
 }
 
+void Toolkit::ResetXmlIdSeed(int seed)
+{
+    m_options->m_xmlIdSeed.SetValue(seed);
+    Object::SeedUuid(m_options->m_xmlIdSeed.GetValue());
+}
+
 void Toolkit::ResetLogBuffer()
 {
     logBuffer.clear();
@@ -1112,7 +1126,7 @@ void Toolkit::RedoLayout()
     else if (m_options->m_breaks.GetValue() == BREAKS_smart) {
         m_doc.CastOffSmartDoc();
     }
-    else {
+    else if (m_options->m_breaks.GetValue() != BREAKS_none) {
         m_doc.CastOffDoc();
     }
 }
@@ -1294,8 +1308,8 @@ std::string Toolkit::RenderToPAE()
         return "";
     }
 
-    PAEOutput paeOutput(&m_doc);
     std::string output;
+    PAEOutput paeOutput(&m_doc);
     if (!paeOutput.Export(output)) {
         LogError("Export to PAE failed");
     }
@@ -1413,6 +1427,14 @@ bool Toolkit::RenderToTimemapFile(const std::string &filename)
 int Toolkit::GetPageCount()
 {
     return m_doc.GetPageCount();
+}
+
+std::string Toolkit::GetDescriptiveFeatures(const std::string &options)
+{
+    // For now do not handle any option
+    std::string output;
+    m_doc.ExportFeatures(output, options);
+    return output;
 }
 
 int Toolkit::GetPageWithElement(const std::string &xmlId)

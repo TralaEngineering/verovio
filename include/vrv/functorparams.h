@@ -31,6 +31,7 @@ class Dynam;
 class Ending;
 class Output;
 class Facsimile;
+class FeatureExtractor;
 class Functor;
 class Hairpin;
 class Harm;
@@ -186,8 +187,11 @@ public:
  * member 0: the beam that should be adjusted
  * member 1: y coordinate of the beam left side
  * member 2: y coordinate of the beam right side
- * member 3: overlap margin that beam needs to be displaced by
- * member 4: the Doc
+ * member 3: x coordinate of the beam left side (starting point)
+ * member 4: slope of the beam
+ * member 5: overlap margin that beam needs to be displaced by
+ * member 6: the Doc
+ * member 7: the flag indicating whether element from different layer is being processed
  **/
 
 class AdjustBeamParams : public FunctorParams {
@@ -197,6 +201,8 @@ public:
         m_beam = NULL;
         m_y1 = 0;
         m_y2 = 0;
+        m_x1 = 0;
+        m_beamSlope = 0.0;
         m_directionBias = 0;
         m_overlapMargin = 0;
         m_doc = doc;
@@ -206,6 +212,8 @@ public:
     Object *m_beam;
     int m_y1;
     int m_y2;
+    int m_x1;
+    double m_beamSlope;
     int m_directionBias;
     int m_overlapMargin;
     Doc *m_doc;
@@ -679,12 +687,13 @@ public:
  * member 7: the upcoming bounding boxes (to be used in the next aligner)
  * member 8: list of types to include
  * member 9: list of types to exclude
- * member 10: list of tie endpoints for the current measure
- * member 11: the Doc
- * member 12: the Functor for redirection to the MeasureAligner
- * member 13: the end Functor for redirection
- * member 14: current aligner that is being processed
- * member 15: preceeding aligner that was handled before
+ * member 10: flag to indicate whether only right bar line positions should be considered
+ * member 11: list of tie endpoints for the current measure
+ * member 12: the Doc
+ * member 13: the Functor for redirection to the MeasureAligner
+ * member 14: the end Functor for redirection
+ * member 15: current aligner that is being processed
+ * member 16: preceeding aligner that was handled before
  **/
 
 class AdjustXPosParams : public FunctorParams {
@@ -697,6 +706,7 @@ public:
         m_staffN = 0;
         m_staffNs = staffNs;
         m_staffSize = 100;
+        m_rightBarLinesOnly = false;
         m_doc = doc;
         m_functor = functor;
         m_functorEnd = functorEnd;
@@ -714,6 +724,7 @@ public:
     std::vector<BoundingBox *> m_upcomingBoundingBoxes;
     std::vector<ClassId> m_includes;
     std::vector<ClassId> m_excludes;
+    bool m_rightBarLinesOnly;
     std::vector<std::pair<LayerElement *, LayerElement *>> m_measureTieEndpoints;
     Doc *m_doc;
     Functor *m_functor;
@@ -1566,6 +1577,26 @@ public:
     double m_realTimeOffsetMilliseconds;
     double m_currentTempo;
     Functor *m_functor;
+};
+
+//----------------------------------------------------------------------------
+// GenerateFeaturesParams
+//----------------------------------------------------------------------------
+
+/**
+ * member 0: a pointer to the Doc
+ * member 1: a pointer to the FeatureExtractor to which extraction is delegated
+ **/
+
+class GenerateFeaturesParams : public FunctorParams {
+public:
+    GenerateFeaturesParams(Doc *doc, FeatureExtractor *extractor)
+    {
+        m_doc = doc;
+        m_extractor = extractor;
+    }
+    Doc *m_doc;
+    FeatureExtractor *m_extractor;
 };
 
 //----------------------------------------------------------------------------

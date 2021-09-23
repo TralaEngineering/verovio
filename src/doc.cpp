@@ -19,6 +19,7 @@
 #include "chord.h"
 #include "comparison.h"
 #include "expansion.h"
+#include "featureextractor.h"
 #include "functorparams.h"
 #include "glyph.h"
 #include "instrdef.h"
@@ -70,7 +71,7 @@ namespace vrv {
 // Doc
 //----------------------------------------------------------------------------
 
-Doc::Doc() : Object("doc-")
+Doc::Doc() : Object(DOC, "doc-")
 {
     m_options = new Options();
 
@@ -414,6 +415,26 @@ bool Doc::ExportTimemap(std::string &output)
 
     PrepareJsonTimemap(output, generateTimemapParams.realTimeToScoreTime, generateTimemapParams.realTimeToOnElements,
         generateTimemapParams.realTimeToOffElements, generateTimemapParams.realTimeToTempo);
+
+    return true;
+}
+
+bool Doc::ExportFeatures(std::string &output, const std::string &options)
+{
+    if (!Doc::HasMidiTimemap()) {
+        // generate MIDI timemap before progressing
+        CalculateMidiTimemap();
+    }
+    if (!Doc::HasMidiTimemap()) {
+        LogWarning("Calculation of MIDI timemap failed, not exporting MidiFile.");
+        output = "";
+        return false;
+    }
+    FeatureExtractor extractor(options);
+    Functor generateFeatures(&Object::GenerateFeatures);
+    GenerateFeaturesParams generateFeaturesParams(this, &extractor);
+    this->Process(&generateFeatures, &generateFeaturesParams);
+    extractor.ToJson(output);
 
     return true;
 }
@@ -1535,8 +1556,6 @@ double Doc::GetLeftMargin(const ClassId classId) const
 {
     if (classId == ACCID) return m_options->m_leftMarginAccid.GetValue();
     if (classId == BARLINE) return m_options->m_leftMarginBarLine.GetValue();
-    if (classId == BARLINE_ATTR_LEFT) return m_options->m_leftMarginLeftBarLine.GetValue();
-    if (classId == BARLINE_ATTR_RIGHT) return m_options->m_leftMarginRightBarLine.GetValue();
     if (classId == BEATRPT) return m_options->m_leftMarginBeatRpt.GetValue();
     if (classId == CHORD) return m_options->m_leftMarginChord.GetValue();
     if (classId == CLEF) return m_options->m_leftMarginClef.GetValue();
@@ -1554,12 +1573,26 @@ double Doc::GetLeftMargin(const ClassId classId) const
     return m_options->m_defaultLeftMargin.GetValue();
 }
 
+double Doc::GetLeftMargin(Object *object) const
+{
+    assert(object);
+    const ClassId id = object->GetClassId();
+    if (id == BARLINE) {
+        BarLine *barLine = vrv_cast<BarLine *>(object);
+        switch (barLine->GetPosition()) {
+            case BarLinePosition::None: return m_options->m_leftMarginBarLine.GetValue();
+            case BarLinePosition::Left: return m_options->m_leftMarginLeftBarLine.GetValue();
+            case BarLinePosition::Right: return m_options->m_leftMarginRightBarLine.GetValue();
+            default: break;
+        }
+    }
+    return this->GetLeftMargin(id);
+}
+
 double Doc::GetRightMargin(const ClassId classId) const
 {
     if (classId == ACCID) return m_options->m_rightMarginAccid.GetValue();
     if (classId == BARLINE) return m_options->m_rightMarginBarLine.GetValue();
-    if (classId == BARLINE_ATTR_LEFT) return m_options->m_rightMarginLeftBarLine.GetValue();
-    if (classId == BARLINE_ATTR_RIGHT) return m_options->m_rightMarginRightBarLine.GetValue();
     if (classId == BEATRPT) return m_options->m_rightMarginBeatRpt.GetValue();
     if (classId == CHORD) return m_options->m_rightMarginChord.GetValue();
     if (classId == CLEF) return m_options->m_rightMarginClef.GetValue();
@@ -1575,6 +1608,22 @@ double Doc::GetRightMargin(const ClassId classId) const
     if (classId == REST) return m_options->m_rightMarginRest.GetValue();
     if (classId == TABDURSYM) return m_options->m_rightMarginTabDurSym.GetValue();
     return m_options->m_defaultRightMargin.GetValue();
+}
+
+double Doc::GetRightMargin(Object *object) const
+{
+    assert(object);
+    const ClassId id = object->GetClassId();
+    if (id == BARLINE) {
+        BarLine *barLine = vrv_cast<BarLine *>(object);
+        switch (barLine->GetPosition()) {
+            case BarLinePosition::None: return m_options->m_rightMarginBarLine.GetValue();
+            case BarLinePosition::Left: return m_options->m_rightMarginLeftBarLine.GetValue();
+            case BarLinePosition::Right: return m_options->m_rightMarginRightBarLine.GetValue();
+            default: break;
+        }
+    }
+    return this->GetRightMargin(id);
 }
 
 double Doc::GetBottomMargin(const ClassId classId) const
