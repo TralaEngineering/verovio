@@ -11,16 +11,24 @@ if (APPLE)
 endif (APPLE)
 
 option(VRV_DYNAMIC_CAST         "Enable <dynamic_cast>"                        OFF)
-option(NO_DARMS_SUPPORT         "Disable DARMS support"                        ON)
+option(NO_DARMS_SUPPORT         "Disable DARMS support"                        OFF)
 option(NO_PAE_SUPPORT           "Disable Plaine & Easie support"               OFF)
 option(NO_ABC_SUPPORT           "Disable ABC support"                          OFF)
 option(NO_MXL_SUPPORT           "Disable compressed MusicXML support"          OFF)
 option(NO_HUMDRUM_SUPPORT       "Disable Humdrum support"                      OFF)
 option(MUSICXML_DEFAULT_HUMDRUM "Enable MusicXML to Humdrum by default"        OFF)
-option(BUILD_AS_LIBRARY         "Build verovio as library"                     OFF)
+option(BUILD_AS_LIBRARY         "Build verovio as library"                     ON)
 
 if (NO_HUMDRUM_SUPPORT AND MUSICXML_DEFAULT_HUMDRUM)
     message(SEND_ERROR "Default MusicXML to Humdrum cannot be enabled by default without Humdrum support")
+endif()
+
+if(ANDROID)
+    # Always build as a shared lib on Android (for licensing and JNI)
+    set(BUILD_AS_LIBRARY ON CACHE BOOL "Build verovio as shared lib" FORCE)
+
+    # Android 15+ 16KB page size requirement
+    add_definitions(-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON)
 endif()
 
 include_directories(
@@ -167,6 +175,10 @@ if (BUILD_AS_LIBRARY)
     message(STATUS "***** Building Verovio as shared library *****")
     add_library(verovio SHARED ../tools/c_wrapper.cpp ${all_SRC})
 
+    if(ANDROID)
+        target_link_options(verovio PRIVATE "-Wl,-z,max-page-size=16384")
+    endif()
+
 ###########
 # WASM BC #
 ###########
@@ -226,12 +238,14 @@ else()
 
 endif()
 
-install(
-    TARGETS verovio
-    DESTINATION /usr/local/bin
-)
-install(
-    DIRECTORY ../data/
-    DESTINATION share/verovio
-    FILES_MATCHING PATTERN "*.xml" PATTERN "*.svg"
-)
+if(NOT ANDROID)
+    install(
+            TARGETS verovio
+            DESTINATION /usr/local/bin
+    )
+    install(
+            DIRECTORY ../data/
+            DESTINATION share/verovio
+            FILES_MATCHING PATTERN "*.xml" PATTERN "*.svg"
+    )
+endif()
